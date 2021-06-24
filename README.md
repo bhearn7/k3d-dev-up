@@ -12,8 +12,8 @@ Deploy k3d to AWS.
 
 2. export required terraform variables
 ```
-export TF_VAR_AWSPROFILE="default"
-export TF_VAR_AWSUSERNAME="blake.hearn"
+export TF_VAR_AWSPROFILE=<YOUR_PROFILE> # example: "default"
+export TF_VAR_AWSUSERNAME=<YOUR_USERNAME> # example: "first.last"
 export TF_VAR_DATETIME=$( date +%Y%m%d%H%M%S )
 export TF_VAR_YOURLOCALPUBLICIP=$( curl https://checkip.amazonaws.com )
 ```
