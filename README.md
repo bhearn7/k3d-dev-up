@@ -8,7 +8,7 @@ Deploy k3d to AWS.
 
 ### Instructions
 
-1. **ensure userdata.txt and private key are in current directory**
+1. **ensure private key is in current directory**
 
 2. export required terraform variables
 ```
