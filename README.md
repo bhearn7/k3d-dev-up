@@ -2,36 +2,42 @@
 
 Deploy k3d to AWS.
 
-### Pre Reqs
+## Prerequisites
+
 - terraform
 - scp
 
-### Instructions
+## Instructions
 
 1. **ensure private key is in current directory**
 
-2. export required terraform variables
-```
+1. export required terraform variables
+
+```shell
 export TF_VAR_AWSPROFILE=<YOUR_PROFILE> # example: "default"
 export TF_VAR_AWSUSERNAME=<YOUR_USERNAME> # example: "first.last"
 export TF_VAR_DATETIME=$( date +%Y%m%d%H%M%S )
 export TF_VAR_YOURLOCALPUBLICIP=$( curl https://checkip.amazonaws.com )
 ```
 
-3. create infrastructure (Kubeconfig is dumped into working directory as `k3d.yaml`)
-```
+1. Create infrastructure (Kubeconfig is dumped into working directory as `k3d.yaml`)
+
+```shell
 terraform apply
 ```
 
-4. Edit `k3d.yaml`, replace the server host `0.0.0.0` with the public IP of the EC2 instance, and test cluster access
-```
+1. Edit `k3d.yaml`, replace the server host `0.0.0.0` with the public IP of the EC2 instance, and test cluster access
+
+```shell
 kubectl --kubeconfig=./k3d.yaml get nodes
 ```
 
-### Cleanup
+## Cleanup
 
-`terraform destroy`
+```shell
+terraform destroy
+```
 
-### Contributing
+## Contributing
 
 Please open an issue or PR if you'd like to see something changed.
