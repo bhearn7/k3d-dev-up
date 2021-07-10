@@ -85,6 +85,6 @@ resource "null_resource" "copy_kubeconfig" {
   depends_on = [null_resource.create_k3d_cluster]
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
-    command     = "scp -i ./${var.AWSUSERNAME}.pem ubuntu@${aws_instance.ec2_instance.public_ip}:~/.kube/config ./k3d.yaml"
+    command     = "scp -o StrictHostKeyChecking=no -i ./${var.AWSUSERNAME}.pem ubuntu@${aws_instance.ec2_instance.public_ip}:~/.kube/config ./k3d.yaml"
   }
 }
