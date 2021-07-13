@@ -1,27 +1,23 @@
-variable "AWSPROFILE" {
-  type = string
-}
 variable "AWSUSERNAME" {
   type = string
 }
-variable "DATETIME" {
-  type = string
-}
-variable "YOURLOCALPUBLICIP" {
-  type = string
+data "http" "myip" {
+  url = "http://ipv4.icanhazip.com"
 }
 provider "aws" {
-  profile = var.AWSPROFILE
-  region  = "us-gov-west-1"
+  region = "us-gov-west-1"
 }
 resource "aws_security_group" "allow_ingress" {
-  name        = var.AWSUSERNAME
-  description = "Created by ${var.AWSUSERNAME} at ${var.DATETIME}"
+  name = var.AWSUSERNAME
+  lifecycle {
+    ignore_changes = [description]
+  }
+  description = "Created by ${var.AWSUSERNAME} at ${timestamp()}"
   ingress {
     from_port   = 0
     to_port     = 65535
     protocol    = "tcp"
-    cidr_blocks = ["${var.YOURLOCALPUBLICIP}/32"]
+    cidr_blocks = ["${chomp(data.http.myip.body)}/32"]
   }
   egress {
     from_port   = 0
@@ -53,6 +49,7 @@ resource "aws_instance" "ec2_instance" {
   }
   provisioner "remote-exec" {
     inline = [
+      "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
       "sudo apt remove docker docker-engine docker.io containerd runc",
       "sudo apt update",
       "sudo apt install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common",
@@ -85,6 +82,6 @@ resource "null_resource" "copy_kubeconfig" {
   depends_on = [null_resource.create_k3d_cluster]
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
-    command     = "scp -o StrictHostKeyChecking=no -i ./${var.AWSUSERNAME}.pem ubuntu@${aws_instance.ec2_instance.public_ip}:~/.kube/config ./k3d.yaml"
+    command     = "scp -o StrictHostKeyChecking=no -i ./${var.AWSUSERNAME}.pem ubuntu@${aws_instance.ec2_instance.public_ip}:~/.kube/config ./config; sed -e 's/0.0.0.0/${aws_instance.ec2_instance.public_ip}/' config > k3d.yaml; rm ./config"
   }
 }
