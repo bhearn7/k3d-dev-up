@@ -1,6 +1,5 @@
-.terraform
-.terraform.*
-terraform.*
+.terraform*
+*.tfstate*
 *.pem
 *.pub
 k3d.yaml

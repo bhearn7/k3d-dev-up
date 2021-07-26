@@ -36,36 +36,22 @@ aws configure
 aws configure list
 ```
 
-1. Set username variable and disable local pager
+2. Set username variable
 
 ```shell
 export TF_VAR_AWSUSERNAME=$( aws sts get-caller-identity --query Arn --output text | cut -f 2 -d '/' )
-export AWS_PAGER=""
 
 # verify username
 echo $TF_VAR_AWSUSERNAME
 ```
 
-1. Recreate keypair
-
-```shell
-rm -f $TF_VAR_AWSUSERNAME.pem
-aws ec2 delete-key-pair --key-name $TF_VAR_AWSUSERNAME
-aws ec2 create-key-pair --key-name $TF_VAR_AWSUSERNAME --query 'KeyMaterial' --output text > $TF_VAR_AWSUSERNAME.pem
-chmod 400 $TF_VAR_AWSUSERNAME.pem
-
-# verify private key
-openssl rsa -noout -inform PEM -in $TF_VAR_AWSUSERNAME.pem
-aws ec2 describe-key-pairs --key-name $TF_VAR_AWSUSERNAME
-```
-
-1. Create infrastructure (kubeconfig is dumped into working directory as `k3d.yaml`)
+3. Create infrastructure (kubeconfig is dumped into working directory as `k3d.yaml`)
 
 ```shell
 terraform apply
 ```
 
-1. Test cluster access
+4. Test cluster access
 
 ```shell
 kubectl --kubeconfig=./k3d.yaml get nodes

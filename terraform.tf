@@ -1,11 +1,21 @@
 variable "AWSUSERNAME" {
   type = string
 }
-data "http" "myip" {
-  url = "http://ipv4.icanhazip.com"
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+  }
 }
 provider "aws" {
-  region = "us-gov-west-1"
+  region                  = "us-gov-west-1"
+}
+
+data "http" "myip" {
+  url = "http://ipv4.icanhazip.com"
 }
 resource "aws_security_group" "allow_ingress" {
   name = var.AWSUSERNAME
@@ -26,10 +36,24 @@ resource "aws_security_group" "allow_ingress" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+resource "tls_private_key" "ssh" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+resource "local_file" "pem" {
+  filename        = "${var.AWSUSERNAME}.pem"
+  content         = tls_private_key.ssh.private_key_pem
+  file_permission = "0600"
+}
+resource "aws_key_pair" "ec2_keypair" {
+  key_name   = "${var.AWSUSERNAME}"
+  public_key = tls_private_key.ssh.public_key_openssh
+}
 resource "aws_instance" "ec2_instance" {
   ami           = "ami-84556de5"
   instance_type = "t2.xlarge"
-  key_name      = var.AWSUSERNAME
+  key_name      = aws_key_pair.ec2_keypair.key_name
   tags = {
     "Owner" = "${var.AWSUSERNAME}",
     "env"   = "bigbangdev"
@@ -61,6 +85,7 @@ resource "aws_instance" "ec2_instance" {
     ]
   }
 }
+
 resource "null_resource" "create_k3d_cluster" {
   depends_on = [aws_instance.ec2_instance]
   connection {
