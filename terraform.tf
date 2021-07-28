@@ -1,5 +1,5 @@
-variable "AWSUSERNAME" {
-  type = string
+data "http" "myip" {
+  url = "http://ipv4.icanhazip.com"
 }
 
 terraform {
@@ -11,13 +11,11 @@ terraform {
   }
 }
 provider "aws" {
-  region                  = "us-gov-west-1"
+  region  = "us-gov-west-1"
+  profile = var.AWSPROFILE
 }
 
-data "http" "myip" {
-  url = "http://ipv4.icanhazip.com"
-}
-resource "aws_security_group" "allow_ingress" {
+resource "aws_security_group" "allow_personal_ingress" {
   name = var.AWSUSERNAME
   lifecycle {
     ignore_changes = [description]
@@ -44,10 +42,10 @@ resource "tls_private_key" "ssh" {
 resource "local_file" "pem" {
   filename        = "${var.AWSUSERNAME}.pem"
   content         = tls_private_key.ssh.private_key_pem
-  file_permission = "0600"
+  file_permission = "400"
 }
 resource "aws_key_pair" "ec2_keypair" {
-  key_name   = "${var.AWSUSERNAME}"
+  key_name   = var.AWSUSERNAME
   public_key = tls_private_key.ssh.public_key_openssh
 }
 resource "aws_instance" "ec2_instance" {
@@ -63,7 +61,7 @@ resource "aws_instance" "ec2_instance" {
     volume_size = 50
   }
   iam_instance_profile = "InstanceOpsRole"
-  security_groups      = [aws_security_group.allow_ingress.name]
+  security_groups      = [aws_security_group.allow_personal_ingress.name]
   user_data            = file("./userdata.txt")
   connection {
     type        = "ssh"
@@ -109,4 +107,8 @@ resource "null_resource" "copy_kubeconfig" {
     interpreter = ["bash", "-c"]
     command     = "scp -o StrictHostKeyChecking=no -i ./${var.AWSUSERNAME}.pem ubuntu@${aws_instance.ec2_instance.public_ip}:~/.kube/config ./config; sed -e 's/0.0.0.0/${aws_instance.ec2_instance.public_ip}/' config > k3d.yaml; rm ./config"
   }
+}
+
+output "ec2_instance_ip" {
+  value = aws_instance.ec2_instance.public_ip
 }
