@@ -2,57 +2,54 @@
 
 Deploy k3d dev environment to AWS, including:
 
-- creating a security group
-- creating an instance
+- creating an ec2 security group
+- creating a private key
+- creating a local .pem file
+- creating an ec2 keypair
+- creating an ec2 instance
 - creating a k3d cluster on the instance
-- copying the k3d cluster's kubeconfig to your local machine
+- copying the cluster's kubeconfig to your local machine
 
 ## Prerequisites
 
 - aws cli
 - terraform
-- bash
 - kubectl
 
-Commands used:
+Shell commands used:
 
-- `chmod` - to set permissions on the private key
-- `openssl` - to verify private key
 - `scp` - to copy the remote kubeconfig to local machine
 - `sed` - to update the kubeconfig's server IP
 
 ## Instructions
 
-1. Configure aws credentials
-
+1. Check for an existing AWS profile 
 ```shell
-aws configure
+aws configure list-profiles
+```
+2. If desired profile is not present, configure a profile
+```shell
+aws configure --profile <PROFILE_NAME>
 # aws_access_key_id - The AWS access key part of your credentials
 # aws_secret_access_key - The AWS secret access key part of your credentials
 # region - us-gov-west-1
 # output - json
-
-# verify configuration
-aws configure list
 ```
-
-2. Set username variable
-
+3. Create required variables (or set in variables.tf)
 ```shell
-export TF_VAR_AWSUSERNAME=$( aws sts get-caller-identity --query Arn --output text | cut -f 2 -d '/' )
+export TF_VAR_AWSPROFILE="<PROFILE_NAME>"
+export TF_VAR_AWSUSERNAME=$( aws sts get-caller-identity --query Arn --output text --profile ${TF_VAR_AWSPROFILE} | cut -f 2 -d '/' )
 
-# verify username
-echo $TF_VAR_AWSUSERNAME
 ```
-
-3. Create infrastructure (kubeconfig is dumped into working directory as `k3d.yaml`)
-
+4. Initialize terraform (first time only)
+```shell
+terraform init
+```
+5. Create infrastructure (kubeconfig is dumped into working directory as `k3d.yaml`)
 ```shell
 terraform apply
 ```
-
-4. Test cluster access
-
+6. Test cluster access
 ```shell
 kubectl --kubeconfig=./k3d.yaml get nodes
 ```
