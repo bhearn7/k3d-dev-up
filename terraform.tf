@@ -50,7 +50,7 @@ resource "aws_key_pair" "ec2_keypair" {
 }
 resource "aws_instance" "ec2_instance" {
   ami           = "ami-84556de5"
-  instance_type = "t2.xlarge"
+  instance_type = var.INSTANCETYPE
   key_name      = aws_key_pair.ec2_keypair.key_name
   tags = {
     "Owner" = "${var.AWSUSERNAME}",
@@ -58,7 +58,7 @@ resource "aws_instance" "ec2_instance" {
   }
   ebs_block_device {
     device_name = "/dev/sda1"
-    volume_size = 50
+    volume_size = var.VOLUMESIZE
   }
   iam_instance_profile = "InstanceOpsRole"
   security_groups      = [aws_security_group.allow_personal_ingress.name]

@@ -35,11 +35,15 @@ aws configure --profile <PROFILE_NAME>
 # region - us-gov-west-1
 # output - json
 ```
-3. Create required variables (or set in variables.tf)
+3. Create variables (or set in variables.tf)
 ```shell
+# required
 export TF_VAR_AWSPROFILE="<PROFILE_NAME>"
 export TF_VAR_AWSUSERNAME=$( aws sts get-caller-identity --query Arn --output text --profile ${TF_VAR_AWSPROFILE} | cut -f 2 -d '/' )
 
+# optional
+export TF_VAR_INSTANCETYPE="<EC2_INSTANCE_TYPE>"            # defaults to "t2.xlarge" if not set
+export TF_VAR_VOLUMESIZE="<EC2_EBS_VOLUME_SIZE>"            # defaults to "50" if not set (GiBs)
 ```
 4. Initialize terraform (first time only)
 ```shell
