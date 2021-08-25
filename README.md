@@ -8,6 +8,7 @@ Deploy k3d dev environment to AWS, including:
 - creating an ec2 keypair
 - creating an ec2 instance
 - creating a k3d cluster on the instance
+- installing Big Bang's flux on the k3d cluster
 - copying the cluster's kubeconfig to your local machine
 
 ## Prerequisites
@@ -35,15 +36,15 @@ aws configure --profile <PROFILE_NAME>
 # region - us-gov-west-1
 # output - json
 ```
-3. Create variables (or set in variables.tf)
-```shell
-# required
-export TF_VAR_AWSPROFILE="<PROFILE_NAME>"
-export TF_VAR_AWSUSERNAME=$( aws sts get-caller-identity --query Arn --output text --profile ${TF_VAR_AWSPROFILE} | cut -f 2 -d '/' )
-
-# optional
-export TF_VAR_INSTANCETYPE="<EC2_INSTANCE_TYPE>"            # defaults to "t2.xlarge" if not set
-export TF_VAR_VOLUMESIZE="<EC2_EBS_VOLUME_SIZE>"            # defaults to "50" if not set (GiBs)
+3. Set variables in variables.yaml
+```yaml
+# example
+awsProfile: "default"
+awsUsername: "first.last"
+instanceType: "t2.2xlarge"
+volumeSize: 50
+registryUsername: "first.last"
+registryPassword: "abcd1234"
 ```
 4. Initialize terraform (first time only)
 ```shell
