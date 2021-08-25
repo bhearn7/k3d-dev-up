@@ -3,3 +3,4 @@
 *.pem
 *.pub
 k3d.yaml
+variables.yaml
