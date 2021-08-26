@@ -111,7 +111,7 @@ resource "null_resource" "setup_cluster" {
   }
 }
 resource "null_resource" "copy_kubeconfig" {
-  depends_on = [null_resource.create_k3d_cluster]
+  depends_on = [null_resource.setup_cluster]
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
     command     = "scp -o StrictHostKeyChecking=no -i ./${local_file.pem.filename} ubuntu@${aws_instance.ec2_instance.public_ip}:~/.kube/config ./config; sed -e 's/0.0.0.0/${aws_instance.ec2_instance.public_ip}/' config > k3d.yaml; rm ./config"
