@@ -39,12 +39,13 @@ aws configure --profile <PROFILE_NAME>
 3. Set variables in variables.yaml
 ```yaml
 # example
-awsProfile: "default"
-awsUsername: "first.last"
-instanceType: "t2.2xlarge"
+awsProfile: default
+awsUsername: first.last
+instanceType: t2.2xlarge
 volumeSize: 50
-registryUsername: "first.last"
-registryPassword: "abcd1234"
+k3dVersion: v4.4.7
+registryUsername: first.last
+registryPassword: abcd1234
 ```
 4. Initialize terraform (first time only)
 ```shell
