@@ -90,7 +90,7 @@ resource "aws_instance" "ec2_instance" {
   }
 }
 
-resource "null_resource" "create_k3d_cluster" {
+resource "null_resource" "setup_cluster" {
   depends_on = [aws_instance.ec2_instance]
   connection {
     type        = "ssh"
@@ -100,7 +100,7 @@ resource "null_resource" "create_k3d_cluster" {
   }
   provisioner "remote-exec" {
     inline = [
-      "wget -q -O - https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash",
+      "curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=${yamldecode(file("variables.yaml"))["k3dVersion"]} bash",
       "export EC2_PUBLIC_IP=$( curl https://ipinfo.io/ip )",
       "echo $EC2_PUBLIC_IP",
       "k3d cluster create --servers 1 --agents 3 --volume /etc/machine-id:/etc/machine-id --k3s-server-arg --disable=traefik --k3s-server-arg --tls-san=$EC2_PUBLIC_IP --port 80:80@loadbalancer --port 443:443@loadbalancer --api-port 6443",
