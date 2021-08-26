@@ -54,9 +54,9 @@ terraform init
 ```shell
 terraform apply
 ```
-6. Test cluster access
+6. Test cluster access (you should see some pods in the `kube-system` and `flux-system` namespaces)
 ```shell
-kubectl --kubeconfig=./k3d.yaml get nodes
+kubectl --kubeconfig=./k3d.yaml get pods --all-namespaces
 ```
 
 ## Cleanup
