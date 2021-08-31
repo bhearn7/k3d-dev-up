@@ -54,7 +54,7 @@ resource "aws_instance" "ec2_instance" {
   key_name      = aws_key_pair.ec2_keypair.key_name
   tags = {
     "Name"  = "${yamldecode(file("variables.yaml"))["awsUsername"]}-k3d-dev",
-    "Owner" = "${yamldecode(file("variables.yaml"))["awsUsername"]}",
+    "Owner" = yamldecode(file("variables.yaml"))["awsUsername"],
     "env"   = "bigbangdev"
   }
   ebs_block_device {
